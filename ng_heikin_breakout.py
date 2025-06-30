@@ -6,6 +6,11 @@ logger = logging.getLogger(__name__)
 class NGHeikinBreakoutAgent(AbstractAgent):
     """Minimal placeholder agent."""
 
+    def __init__(self, brokers=None, redis_cache=None, postgres_db=None):
+        self.brokers = brokers or {}
+        self.redis_cache = redis_cache
+        self.postgres_db = postgres_db
+
     async def run(self):
         logger.info("Agent started")
         while True:

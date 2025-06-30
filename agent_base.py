@@ -1,4 +1,6 @@
 class AbstractAgent:
+    """Base class for trading agents."""
+
     async def run(self):
         raise NotImplementedError
 

@@ -63,7 +63,13 @@ app.add_middleware(
 # --- Global State & Services ---
 active_agents: Dict[str, AbstractAgent] = {}
 agent_tasks: Dict[str, asyncio.Task] = {}
-orchestrator_state = {"status": "IDLE", "daily_pnl": 0.0, "current_drawdown": 0.0, "total_capital": 10000.0} # Initial capital
+orchestrator_state = {
+    "status": "IDLE",
+    "daily_pnl": 0.0,
+    "current_drawdown": 0.0,
+    "total_capital": 10000.0,
+    "start_of_day_capital": 10000.0,
+}  # Initial capital
 
 # Initialize services
 redis_cache: RedisCache = RedisCache(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
@@ -124,6 +130,7 @@ async def startup_event():
 
     # Initialize system PnL in Redis to 0 for the day if not already set
     await redis_cache.set("system:daily_pnl", 0.0)
+    orchestrator_state["start_of_day_capital"] = orchestrator_state["total_capital"]
     await redis_cache.set("system:total_capital", orchestrator_state["total_capital"])
 
     # Start main orchestration loop in a background task
@@ -235,6 +242,7 @@ async def orchestration_loop():
             if current_utc_day != last_pnl_reset_day:
                 logger.info("New day detected. Resetting daily P&L.")
                 orchestrator_state["daily_pnl"] = 0.0
+                orchestrator_state["start_of_day_capital"] = orchestrator_state["total_capital"]
                 await redis_cache.set_total_system_pnl(0.0)
                 last_pnl_reset_day = current_utc_day
 
@@ -394,7 +402,7 @@ async def enforce_risk_controls():
     Implements RiskSentinelX: Max daily drawdown, max trade loss, consecutive losses.
     """
     current_daily_pnl = await redis_cache.get_total_system_pnl()
-    initial_daily_capital = orchestrator_state["total_capital"] # Needs to be tracked from start of day
+    initial_daily_capital = orchestrator_state.get("start_of_day_capital", orchestrator_state["total_capital"])
     
     # Mock for demonstration:
     daily_drawdown = current_daily_pnl / initial_daily_capital if initial_daily_capital else 0.0
