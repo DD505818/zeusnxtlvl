@@ -1,16 +1,16 @@
 from fastapi import FastAPI, WebSocket, HTTPException, Depends, BackgroundTasks, status, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware # Import CORS
-from backend.core.config import settings
-from backend.services.brokers.coinbase import CoinbaseBroker
-from backend.agents.ng_heikin_breakout import NGHeikinBreakoutAgent
-from backend.agents.base import AbstractAgent
-from backend.services.ai.gemini_service import GeminiService
-from backend.services.ai.grok_service import GrokService
-from backend.services.ai.whisper_service import WhisperService
-from backend.services.memory.redis_cache import RedisCache
-from backend.services.memory.postgres_db import PostgresDB
-from backend.services.memory.vector_db import VectorDB
+from config import settings
+from coinbase import CoinbaseBroker
+from ng_heikin_breakout import NGHeikinBreakoutAgent
+from agent_base import AbstractAgent
+from gemini_service import GeminiService
+from grok_service import GrokService
+from whisper_service import WhisperService
+from redis_cache import RedisCache
+from postgres_db import PostgresDB
+from vector_db import VectorDB
 from pydantic import BaseModel
 import uvicorn
 import asyncio
@@ -448,4 +448,5 @@ async def websocket_dashboard(websocket: WebSocket):
 
 
 if __name__ == "__main__":
-    uvicorn.run("backend.api.main:app", host="0.0.0.0", port=settings.API_PORT, reload=False) # reload=True for dev
+    uvicorn.run("main:app", host="0.0.0.0", port=settings.API_PORT, reload=False)  # reload=True for dev
+
