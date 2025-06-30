@@ -14,6 +14,7 @@ from vector_db import VectorDB
 from pydantic import BaseModel
 import uvicorn
 import asyncio
+import random
 import logging
 from typing import Dict, List, Optional
 import json
