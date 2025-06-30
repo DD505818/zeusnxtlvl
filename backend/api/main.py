@@ -1,6 +1,6 @@
 from fastapi import FastAPI, WebSocket, HTTPException, Depends, BackgroundTasks, status, WebSocketDisconnect
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware # Import CORS
+from fastapi.middleware.cors import CORSMiddleware
 from backend.core.config import settings
 from backend.services.brokers.coinbase import CoinbaseBroker
 from backend.agents.ng_heikin_breakout import NGHeikinBreakoutAgent
@@ -18,6 +18,7 @@ import logging
 from typing import Dict, List, Optional
 import json
 from datetime import datetime, time, timedelta
+import random
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -448,4 +449,9 @@ async def websocket_dashboard(websocket: WebSocket):
 
 
 if __name__ == "__main__":
-    uvicorn.run("backend.api.main:app", host="0.0.0.0", port=settings.API_PORT, reload=False) # reload=True for dev
+    uvicorn.run(
+        "backend.api.main:app",
+        host="0.0.0.0",
+        port=settings.API_PORT,
+        reload=False,
+    )  # reload=True for dev
