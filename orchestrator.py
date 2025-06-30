@@ -1,6 +1,6 @@
-from fastapi import FastAPI, WebSocket, HTTPException, Depends, BackgroundTasks, status, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, HTTPException, status, WebSocketDisconnect
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware # Import CORS
+from fastapi.middleware.cors import CORSMiddleware  # Import CORS
 from config import settings
 from coinbase import CoinbaseBroker
 from ng_heikin_breakout import NGHeikinBreakoutAgent
@@ -17,8 +17,7 @@ import asyncio
 import random
 import logging
 from typing import Dict, List, Optional
-import json
-from datetime import datetime, time, timedelta
+from datetime import datetime
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -315,11 +314,32 @@ async def generate_ai_signals(market_data: Dict, sentiment_data: Dict) -> Dict:
     # logger.debug(f"Gemini Analysis: {gemini_analysis}")
 
     # For demonstration, simulate a signal
-    signal = {"direction": "HOLD", "confidence": 0.5, "expected_return": 0.0, "asset": market_data["symbol"]}
-    if market_data.get("price", 0) > 3000 and "bullish" in sentiment_data.get("social_sentiment", "").lower():
-         signal = {"direction": "BUY", "confidence": random.uniform(0.975, 0.999), "expected_return": random.uniform(0.05, 0.1), "asset": market_data["symbol"]}
-    elif market_data.get("price", 0) < 2500 and "bearish" in sentiment_data.get("social_sentiment", "").lower():
-         signal = {"direction": "SELL", "confidence": random.uniform(0.975, 0.999), "expected_return": random.uniform(0.05, 0.1), "asset": market_data["symbol"]}
+    signal = {
+        "direction": "HOLD",
+        "confidence": 0.5,
+        "expected_return": 0.0,
+        "asset": market_data["symbol"],
+    }
+    if (
+        market_data.get("price", 0) > 3000
+        and "bullish" in sentiment_data.get("social_sentiment", "").lower()
+    ):
+        signal = {
+            "direction": "BUY",
+            "confidence": random.uniform(0.975, 0.999),
+            "expected_return": random.uniform(0.05, 0.1),
+            "asset": market_data["symbol"],
+        }
+    elif (
+        market_data.get("price", 0) < 2500
+        and "bearish" in sentiment_data.get("social_sentiment", "").lower()
+    ):
+        signal = {
+            "direction": "SELL",
+            "confidence": random.uniform(0.975, 0.999),
+            "expected_return": random.uniform(0.05, 0.1),
+            "asset": market_data["symbol"],
+        }
 
     return signal
 
@@ -458,4 +478,3 @@ async def websocket_dashboard(websocket: WebSocket):
 
 if __name__ == "__main__":
     uvicorn.run("orchestrator:app", host="0.0.0.0", port=settings.API_PORT, reload=False)  # reload=True for dev
-
