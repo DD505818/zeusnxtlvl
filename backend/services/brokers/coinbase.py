@@ -1,11 +1,6 @@
-from backend.services.brokers.base import BrokerInterface
+from .base import BrokerInterface
 
 class CoinbaseBroker(BrokerInterface):
     async def execute_order(self, symbol: str, side: str, qty: float):
-        # TODO: integrate official Coinbase SDK
         print(f"Coinbase mock order {side} {qty} {symbol}")
         return {"filled_qty": qty}
-
-    async def get_current_price(self, symbol: str) -> float:
-        return 100.0
-

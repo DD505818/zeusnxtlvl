@@ -15,4 +15,4 @@ async def websocket_endpoint(ws: WebSocket):
     await ws.close()
 
 if __name__ == "__main__":
-    uvicorn.run("backend.api.main:app", host="0.0.0.0", port=settings.API_PORT, reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=settings.API_PORT, reload=False)

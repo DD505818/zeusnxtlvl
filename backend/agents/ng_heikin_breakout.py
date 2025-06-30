@@ -1,15 +1,15 @@
-from backend.agents.base import AbstractAgent
-import asyncio, random, logging
+import asyncio
+import logging
+import random
+from .base import AbstractAgent
 
 logger = logging.getLogger(__name__)
 
 class NGHeikinBreakoutAgent(AbstractAgent):
-    """Minimal placeholder agent."""
+    """Minimal placeholder agent demonstrating async trade loop."""
 
-    async def run(self):
+    async def run(self) -> None:
         logger.info("Agent started")
         while True:
-            # placeholder trading logic
             await asyncio.sleep(random.uniform(0.1, 0.5))
             logger.info("Executed mock trade")
-
