@@ -2,7 +2,7 @@ import asyncio
 import logging
 import random
 
-from backend.agents.base import AbstractAgent
+from .base import AbstractAgent
 
 logger = logging.getLogger(__name__)
 
