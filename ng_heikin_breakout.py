@@ -1,5 +1,7 @@
 from agent_base import AbstractAgent
-import asyncio, random, logging
+import asyncio
+import random
+import logging
 
 logger = logging.getLogger(__name__)
 
