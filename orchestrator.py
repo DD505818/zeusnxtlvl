@@ -273,7 +273,7 @@ async def orchestration_loop():
                 "system_status": orchestrator_state["status"],
                 "daily_pnl": orchestrator_state["daily_pnl"],
                 "active_agents_count": len(active_agents),
-                "agents_status": (await get_agents_status()).dict(), # Convert Pydantic model to dict
+                "agents_status": await get_agents_status(),
                 "total_capital": orchestrator_state["total_capital"],
                 "timestamp": datetime.utcnow().isoformat()
             })
@@ -449,5 +449,5 @@ async def websocket_dashboard(websocket: WebSocket):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=settings.API_PORT, reload=False)  # reload=True for dev
+    uvicorn.run("orchestrator:app", host="0.0.0.0", port=settings.API_PORT, reload=False)  # reload=True for dev
 
