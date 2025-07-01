@@ -23,6 +23,14 @@ class RedisCache:
     async def get_agent_status(self, name: str):
         return await self.get(f"agent:{name}:status") or {}
 
+    async def set_agent_status(self, name: str, status: dict):
+        await self.set(f"agent:{name}:status", status)
+
+    async def update_agent_status(self, name: str, **kwargs):
+        status = await self.get_agent_status(name)
+        status.update(kwargs)
+        await self.set_agent_status(name, status)
+
     async def set_total_system_pnl(self, value: float):
         await self.set("system:daily_pnl", value)
 

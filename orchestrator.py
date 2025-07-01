@@ -62,6 +62,7 @@ app.add_middleware(
 # --- Global State & Services ---
 active_agents: Dict[str, AbstractAgent] = {}
 agent_tasks: Dict[str, asyncio.Task] = {}
+orchestration_task: Optional[asyncio.Task] = None
 orchestrator_state = {
     "status": "IDLE",
     "daily_pnl": 0.0,
@@ -133,7 +134,6 @@ async def startup_event():
     await redis_cache.set("system:total_capital", orchestrator_state["total_capital"])
 
     # Start main orchestration loop in a background task
-    asyncio.create_task(orchestration_loop())
     logger.info("FastAPI application startup completed.")
 
 
@@ -141,6 +141,14 @@ async def startup_event():
 async def shutdown_event():
     logger.info("Shutting down ZEUS°NXTLVL...")
     orchestrator_state["status"] = "SHUTTING_DOWN" # Signal loop to stop
+
+    global orchestration_task
+    if orchestration_task and not orchestration_task.done():
+        orchestration_task.cancel()
+        try:
+            await orchestration_task
+        except asyncio.CancelledError:
+            logger.info("Orchestration loop cancelled.")
 
     for agent_name, task in agent_tasks.items():
         logger.info(f"Stopping agent: {agent_name}")
@@ -204,6 +212,10 @@ async def run_system():
     orchestrator_state["status"] = "RUNNING"
     logger.info("ZEUS°NXTLVL System Starting...")
 
+    global orchestration_task
+    if orchestration_task is None or orchestration_task.done():
+        orchestration_task = asyncio.create_task(orchestration_loop())
+
     # For demonstration, manually start the NGHeikinBreakoutAgent
     # In a real system, the orchestrator would dynamically decide which agents to start
     # based on market conditions, available capital, and StrategyForge recommendations.
@@ -225,6 +237,15 @@ async def stop_system():
 
     orchestrator_state["status"] = "HALTED"
     logger.info("ZEUS°NXTLVL System halting.")
+
+    global orchestration_task
+    if orchestration_task and not orchestration_task.done():
+        orchestration_task.cancel()
+        try:
+            await orchestration_task
+        except asyncio.CancelledError:
+            logger.info("Orchestration loop cancelled.")
+
     # The shutdown_event handler will take care of stopping agents and closing connections.
     return {"message": "ZEUS°NXTLVL System halting. Please wait for graceful shutdown."}
 
@@ -377,7 +398,7 @@ async def update_capital_allocation():
     
     capital_per_agent = total_capital / active_agent_count
     for agent_name in active_agents.keys():
-        await redis_cache.set(f"agent:{agent_name}:capital_allocation", capital_per_agent)
+        await redis_cache.update_agent_status(agent_name, capital_allocated=capital_per_agent)
         logger.debug(f"Allocated ${capital_per_agent:.2f} to {agent_name}")
 
 async def execute_trades_via_agents(qualified_agent_names: List[str], asset: str):
