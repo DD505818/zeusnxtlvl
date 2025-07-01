@@ -1,3 +1,6 @@
+import logging
+
+
 class OrderExecutor:
     def __init__(self, risk, portfolio):
         self.risk = risk
@@ -13,3 +16,4 @@ class OrderExecutor:
         executed = await self.simulate_fill(signal, market_data)
         if executed:
             self.portfolio.update(executed)
+

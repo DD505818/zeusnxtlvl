@@ -4,14 +4,13 @@
 ```bash
 pip install -r requirements.txt
 ```
-## Env Config
-Copy `.env.example` to `.env` and fill broker, payment, and AI credentials.
 
-## Launch
+## Env Config
+Create a `.env` file at the project root (see `.env` for example values).
+
+## Launch with Docker
 ```bash
-bash launch_zeus.sh
-# or with Docker
-bash deploy_zeus_gcp.sh
+cd docker && docker-compose up --build -d
 ```
 ## API
 - `/trade` — Place trade via broker SDK
@@ -26,5 +25,9 @@ bash deploy_zeus_gcp.sh
 
 ## Testing
 ```bash
-python backtest.py --agent QuantumBoost --data sample_ohlcv.csv
+python backend/backtest.py --agent QuantumBoost --data sample_ohlcv.csv
 ```
+
+Scripts for launching locally or on Google Cloud Run are located in the
+`scripts/` directory. Example market data (`sample_ohlcv.csv`) is not
+provided and should be supplied separately.

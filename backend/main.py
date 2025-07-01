@@ -448,4 +448,4 @@ async def websocket_dashboard(websocket: WebSocket):
 
 
 if __name__ == "__main__":
-    uvicorn.run("backend.api.main:app", host="0.0.0.0", port=settings.API_PORT, reload=False) # reload=True for dev
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=settings.API_PORT, reload=False)
