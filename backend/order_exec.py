@@ -17,3 +17,16 @@ class OrderExecutor:
         if executed:
             self.portfolio.update(executed)
 
+    async def simulate_fill(self, signal, market_data):
+        """Simulate an order fill with basic slippage."""
+        price = market_data.get("price") if isinstance(market_data, dict) else None
+        if price is None:
+            price = getattr(market_data, "price", 0)
+        trade = {
+            "symbol": signal.get("symbol"),
+            "qty": signal.get("qty", 0),
+            "price": price,
+            "action": signal.get("action"),
+        }
+        return trade
+
