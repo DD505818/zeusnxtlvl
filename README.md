@@ -1,27 +1,46 @@
-# ZEUS°NXTLVL
+# ZeusNxtLvl: AI Trading App
 
-This repository contains a minimal AI trading stack with a FastAPI backend and a Next.js frontend.
+## Project Structure
 
-## Project Layout
-- **backend/** – FastAPI application and trading logic
-- **frontend/** – Next.js client
-- **docker/** – Dockerfiles and `docker-compose.yml`
-- **scripts/** – Deployment and helper scripts
-- `.env` – environment variables loaded by the backend
+```text
+zeusnxtlvl/
+├── backend/                # FastAPI backend code
+├── frontend/               # React/Next.js frontend code
+├── docker/                 # Dockerfiles and docker-compose.yml
+│   ├── backend.Dockerfile
+│   ├── frontend.Dockerfile
+│   └── docker-compose.yml
+├── scripts/                # Deployment and CI scripts
+├── .env                    # Environment variables (not committed)
+├── README.md               # Project documentation
+```
 
-## Quick Start
-1. Create a `.env` file based on the keys in `backend/core/config.py`.
-2. Build and run the stack:
+## Launch (Local Docker)
 
-```bash
+```sh
 cd docker && docker-compose up --build -d
 ```
 
-The API will be available on `http://localhost:8000` and the frontend on `http://localhost:3000`.
+- Backend: http://localhost:8000
+- Frontend: http://localhost:3000
 
-## Development
-Run the backtest locally:
-```bash
-python -m backend.backtest --agent QuantumBoost --data sample_ohlcv.csv
-```
+## Environment Variables
+
+- All secrets/config must be set in `.env` at the project root.
+- No hardcoded secrets in code or Dockerfiles.
+
+## Google Cloud Run
+
+- The Dockerfiles are ready for Cloud Run deployment.
+- You may need to adjust environment variables and volumes for production.
+
+## Missing/To-Check
+
+- Ensure `.env` contains all required variables (see backend and database configs).
+- If you use CI/CD, add scripts to `/scripts/`.
+- If you use static assets or public files for frontend, ensure they are in `/frontend/public/`.
+- If you use migrations, add instructions/scripts to `/scripts/`.
+
+---
+For more, see `/scripts/README_RESTRUCTURE_CHECKLIST.txt`.
 
