@@ -24,3 +24,4 @@ if __name__ == "__main__":
     parser.add_argument("--data", type=str, required=True)
     args = parser.parse_args()
     main(args.agent, args.data)
+
