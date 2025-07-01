@@ -12,3 +12,4 @@ class NGHeikinBreakoutAgent(AbstractAgent):
             # placeholder trading logic
             await asyncio.sleep(random.uniform(0.1, 0.5))
             logger.info("Executed mock trade")
+
