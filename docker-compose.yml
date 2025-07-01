@@ -3,7 +3,7 @@ services:
   zeus-api:
     build:
       context: ./backend
-      dockerfile: backend.Dockerfile
+      dockerfile: Dockerfile
     container_name: zeus_api
     ports:
       - "8000:8000"
@@ -18,7 +18,7 @@ services:
   zeus-frontend:
     build:
       context: ./frontend
-      dockerfile: frontend.Dockerfile
+      dockerfile: Dockerfile
     container_name: zeus_frontend
     ports:
       - "3000:3000"

@@ -5,7 +5,7 @@ This repository contains a minimal AI trading stack with a FastAPI backend and a
 ## Project Layout
 - **backend/** – FastAPI application and trading logic
 - **frontend/** – Next.js client
-- **docker/** – Dockerfiles and `docker-compose.yml`
+- **docker/** – Dockerfiles
 - **scripts/** – Deployment and helper scripts
 - `.env` – environment variables loaded by the backend
 
@@ -14,7 +14,7 @@ This repository contains a minimal AI trading stack with a FastAPI backend and a
 2. Build and run the stack:
 
 ```bash
-cd docker && docker-compose up --build -d
+docker-compose up --build -d
 ```
 
 The API will be available on `http://localhost:8000` and the frontend on `http://localhost:3000`.
