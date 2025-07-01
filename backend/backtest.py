@@ -1,7 +1,11 @@
 
 import argparse
 import pandas as pd
-from top_agents import QuantumBoostAgent, PredictiveProphetAgent, VWAPScalperXAgent
+from .top_agents import (
+    QuantumBoostAgent,
+    PredictiveProphetAgent,
+    VWAPScalperXAgent,
+)
 
 def main(agent_name, data_path):
     df = pd.read_csv(data_path)

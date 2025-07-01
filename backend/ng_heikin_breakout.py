@@ -1,4 +1,4 @@
-from agent_base import AbstractAgent
+from .agent_base import AbstractAgent
 import asyncio
 import random
 import logging

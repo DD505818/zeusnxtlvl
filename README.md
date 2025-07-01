@@ -1,22 +1,22 @@
 # ZEUS°NXTLVL - THE FINAL SYSTEM
 
+> **Note**: The frontend is a minimal placeholder and may require `npm install` during Docker build. Ensure your `.env` contains valid API keys before launching.
+
 ## Install
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 ## Env Config
 Copy `.env.example` to `.env` and fill broker, payment, and AI credentials.
 
 ## Launch
 ```bash
-bash launch_zeus.sh
-# or with Docker
-bash deploy_zeus_gcp.sh
+cd docker && docker-compose up --build -d
 ```
 
-Run locally with Uvicorn:
+Run backend locally with Uvicorn:
 ```bash
-uvicorn orchestrator:app --host 0.0.0.0 --port 8000
+uvicorn backend.orchestrator:app --host 0.0.0.0 --port 8000
 ```
 ## API
 - `/trade` — Place trade via broker SDK

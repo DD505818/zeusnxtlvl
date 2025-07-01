@@ -1,5 +1,5 @@
 from fastapi import FastAPI, WebSocket
-from config import settings
+from .config import settings
 import uvicorn
 
 app = FastAPI(title=settings.PROJECT_NAME, version="1.0.0")
@@ -15,4 +15,4 @@ async def websocket_endpoint(ws: WebSocket):
     await ws.close()
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=settings.API_PORT, reload=False)
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=settings.API_PORT, reload=False)
