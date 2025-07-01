@@ -1,6 +1,6 @@
 # ZEUS°NXTLVL - THE FINAL SYSTEM
 
-> **Note**: The frontend is a minimal placeholder and may require `npm install` during Docker build. Ensure your `.env` contains valid API keys before launching.
+> **Note**: The frontend is a minimal placeholder and may require `npm install` during Docker build. Ensure your `.env` contains valid API keys before launching. Python 3.11+ and Node 18+ are recommended for local development.
 
 ## Install
 ```bash
