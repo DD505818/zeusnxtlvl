@@ -44,3 +44,4 @@ cd docker && docker-compose up --build -d
 ---
 For more, see `/scripts/README_RESTRUCTURE_CHECKLIST.txt`.
 
+8
