@@ -1,7 +1,12 @@
 # ZEUS°NXTLVL
 
-This repository contains a minimal AI trading stack with a FastAPI backend and a Next.js frontend.
-**Note:** Docker, Node.js, and Python 3.12 must be available to build the containers. Install the packages in `backend/requirements.txt` and provide a `sample_ohlcv.csv` file for backtesting or adjust the `--data` argument.
+This repository contains a minimal AI trading stack with a FastAPI backend and a
+Next.js frontend.
+
+**Note:** Docker and Node.js (v20+) are required in addition to Python 3.12. Be
+sure to install the dependencies listed in `backend/requirements.txt` and have a
+`sample_ohlcv.csv` available for the backtester (or pass a different file via
+`--data`).
 
 ## Project Layout
 - **backend/** – FastAPI application and trading logic
@@ -25,4 +30,8 @@ Run the backtest locally:
 ```bash
 python -m backend.backtest --agent QuantumBoost --data sample_ohlcv.csv
 ```
+
+Docker must be installed to run `docker-compose`. If Docker is not available,
+use the launch script under `scripts/` to run the backend locally after
+installing dependencies.
 
