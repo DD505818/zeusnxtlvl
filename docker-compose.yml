@@ -1,53 +1,53 @@
 version: '3.9'
 services:
   zeus-api:
-      build:
-            context: ./backend
-                  dockerfile: Dockerfile
-                      container_name: zeus_api
-                          ports:
-                                - "8000:8000"
-                                    env_file:
-                                          - ./.env
-                                              depends_on:
-                                                    - zeus-redis
-                                                          - zeus-postgres
-                                                              volumes:
-                                                                    - ./backend:/app/backend
+    build:
+      context: ./backend
+      dockerfile: backend.Dockerfile
+    container_name: zeus_api
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - zeus-redis
+      - zeus-postgres
+    volumes:
+      - ./backend:/app/backend
 
-                                                                      zeus-frontend:
-                                                                          build:
-                                                                                context: ./frontend
-                                                                                      dockerfile: Dockerfile
-                                                                                          container_name: zeus_frontend
-                                                                                              ports:
-                                                                                                    - "3000:3000"
-                                                                                                        depends_on:
-                                                                                                              - zeus-api
-                                                                                                                  volumes:
-                                                                                                                        - ./frontend:/app
-                                                                                                                              - /app/node_modules
+  zeus-frontend:
+    build:
+      context: ./frontend
+      dockerfile: frontend.Dockerfile
+    container_name: zeus_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - zeus-api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
-                                                                                                                                zeus-redis:
-                                                                                                                                    image: redis:7-alpine
-                                                                                                                                        container_name: zeus_redis
-                                                                                                                                            ports:
-                                                                                                                                                  - "6379:6379"
-                                                                                                                                                      volumes:
-                                                                                                                                                            - redis_data:/data
+  zeus-redis:
+    image: redis:7-alpine
+    container_name: zeus_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
-                                                                                                                                                              zeus-postgres:
-                                                                                                                                                                  image: postgres:16-alpine
-                                                                                                                                                                      container_name: zeus_postgres
-                                                                                                                                                                          environment:
-                                                                                                                                                                                POSTGRES_DB: zeus_nxtlvl
-                                                                                                                                                                                      POSTGRES_USER: zeususer
-                                                                                                                                                                                            POSTGRES_PASSWORD: zeuspassword
-                                                                                                                                                                                                ports:
-                                                                                                                                                                                                      - "5432:5432"
-                                                                                                                                                                                                          volumes:
-                                                                                                                                                                                                                - postgres_data:/var/lib/postgresql/data
+  zeus-postgres:
+    image: postgres:16-alpine
+    container_name: zeus_postgres
+    environment:
+      POSTGRES_DB: zeus_nxtlvl
+      POSTGRES_USER: zeususer
+      POSTGRES_PASSWORD: zeuspassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-                                                                                                                                                                                                                volumes:
-                                                                                                                                                                                                                  redis_data:
-                                                                                                                                                                                                                    postgres_data:
+volumes:
+  redis_data:
+  postgres_data:
