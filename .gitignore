@@ -7,3 +7,9 @@ __pycache__/
 node_modules/
 *.db
 *.sqlite3
+.env
+*.pyc
+__pycache__/
+node_modules/
+*.db
+*.sqlite3
