@@ -13,6 +13,11 @@ bash launch_zeus.sh
 # or with Docker
 bash deploy_zeus_gcp.sh
 ```
+
+Run locally with Uvicorn:
+```bash
+uvicorn orchestrator:app --host 0.0.0.0 --port 8000
+```
 ## API
 - `/trade` — Place trade via broker SDK
 - `/deposit/stripe`, `/deposit/paypal` — Initiate fiat deposits
