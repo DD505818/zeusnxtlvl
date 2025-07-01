@@ -4,25 +4,25 @@
 
 ```text
 zeusnxtlvl/
-├── backend/                # FastAPI backend code
-├── frontend/               # React/Next.js frontend code
+├── backend/                # FastAPI backend code and trading logic
+├── frontend/               # Next.js client
 ├── docker/                 # Dockerfiles and docker-compose.yml
 │   ├── backend.Dockerfile
 │   ├── frontend.Dockerfile
 │   └── docker-compose.yml
-├── scripts/                # Deployment and CI scripts
+├── scripts/                # Deployment and helper scripts
 ├── .env                    # Environment variables (not committed)
 ├── README.md               # Project documentation
 ```
 
 ## Launch (Local Docker)
 
-```sh
+```bash
 cd docker && docker-compose up --build -d
 ```
 
-- Backend: http://localhost:8000
-- Frontend: http://localhost:3000
+- Backend: <http://localhost:8000>
+- Frontend: <http://localhost:3000>
 
 ## Environment Variables
 
@@ -44,4 +44,3 @@ cd docker && docker-compose up --build -d
 ---
 For more, see `/scripts/README_RESTRUCTURE_CHECKLIST.txt`.
 
-8
