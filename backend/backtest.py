@@ -1,6 +1,13 @@
 
-import argparse, pandas as pd
-from backend.agents.top_agents import QuantumBoostAgent, PredictiveProphetAgent, VWAPScalperXAgent
+import argparse
+
+import pandas as pd
+
+from backend.agents.top_agents import (
+    PredictiveProphetAgent,
+    QuantumBoostAgent,
+    VWAPScalperXAgent,
+)
 
 def main(agent_name, data_path):
     df = pd.read_csv(data_path)
@@ -24,3 +31,4 @@ if __name__ == "__main__":
     parser.add_argument("--data", type=str, required=True)
     args = parser.parse_args()
     main(args.agent, args.data)
+
