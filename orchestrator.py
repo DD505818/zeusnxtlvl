@@ -1,23 +1,23 @@
-from fastapi import FastAPI, WebSocket, HTTPException, Depends, BackgroundTasks, status, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, HTTPException, status, WebSocketDisconnect
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware # Import CORS
-from backend.core.config import settings
-from backend.services.brokers.coinbase import CoinbaseBroker
-from backend.agents.ng_heikin_breakout import NGHeikinBreakoutAgent
-from backend.agents.base import AbstractAgent
-from backend.services.ai.gemini_service import GeminiService
-from backend.services.ai.grok_service import GrokService
-from backend.services.ai.whisper_service import WhisperService
-from backend.services.memory.redis_cache import RedisCache
-from backend.services.memory.postgres_db import PostgresDB
-from backend.services.memory.vector_db import VectorDB
+from fastapi.middleware.cors import CORSMiddleware  # Import CORS
+from config import settings
+from coinbase import CoinbaseBroker
+from ng_heikin_breakout import NGHeikinBreakoutAgent
+from agent_base import AbstractAgent
+from gemini_service import GeminiService
+from grok_service import GrokService
+from whisper_service import WhisperService
+from redis_cache import RedisCache
+from postgres_db import PostgresDB
+from vector_db import VectorDB
 from pydantic import BaseModel
 import uvicorn
 import asyncio
+import random
 import logging
 from typing import Dict, List, Optional
-import json
-from datetime import datetime, time, timedelta
+from datetime import datetime
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -62,7 +62,14 @@ app.add_middleware(
 # --- Global State & Services ---
 active_agents: Dict[str, AbstractAgent] = {}
 agent_tasks: Dict[str, asyncio.Task] = {}
-orchestrator_state = {"status": "IDLE", "daily_pnl": 0.0, "current_drawdown": 0.0, "total_capital": 10000.0} # Initial capital
+orchestration_task: Optional[asyncio.Task] = None
+orchestrator_state = {
+    "status": "IDLE",
+    "daily_pnl": 0.0,
+    "current_drawdown": 0.0,
+    "total_capital": 10000.0,
+    "start_of_day_capital": 10000.0,
+}  # Initial capital
 
 # Initialize services
 redis_cache: RedisCache = RedisCache(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
@@ -123,10 +130,10 @@ async def startup_event():
 
     # Initialize system PnL in Redis to 0 for the day if not already set
     await redis_cache.set("system:daily_pnl", 0.0)
+    orchestrator_state["start_of_day_capital"] = orchestrator_state["total_capital"]
     await redis_cache.set("system:total_capital", orchestrator_state["total_capital"])
 
     # Start main orchestration loop in a background task
-    asyncio.create_task(orchestration_loop())
     logger.info("FastAPI application startup completed.")
 
 
@@ -134,6 +141,14 @@ async def startup_event():
 async def shutdown_event():
     logger.info("Shutting down ZEUS°NXTLVL...")
     orchestrator_state["status"] = "SHUTTING_DOWN" # Signal loop to stop
+
+    global orchestration_task
+    if orchestration_task and not orchestration_task.done():
+        orchestration_task.cancel()
+        try:
+            await orchestration_task
+        except asyncio.CancelledError:
+            logger.info("Orchestration loop cancelled.")
 
     for agent_name, task in agent_tasks.items():
         logger.info(f"Stopping agent: {agent_name}")
@@ -197,6 +212,10 @@ async def run_system():
     orchestrator_state["status"] = "RUNNING"
     logger.info("ZEUS°NXTLVL System Starting...")
 
+    global orchestration_task
+    if orchestration_task is None or orchestration_task.done():
+        orchestration_task = asyncio.create_task(orchestration_loop())
+
     # For demonstration, manually start the NGHeikinBreakoutAgent
     # In a real system, the orchestrator would dynamically decide which agents to start
     # based on market conditions, available capital, and StrategyForge recommendations.
@@ -218,6 +237,15 @@ async def stop_system():
 
     orchestrator_state["status"] = "HALTED"
     logger.info("ZEUS°NXTLVL System halting.")
+
+    global orchestration_task
+    if orchestration_task and not orchestration_task.done():
+        orchestration_task.cancel()
+        try:
+            await orchestration_task
+        except asyncio.CancelledError:
+            logger.info("Orchestration loop cancelled.")
+
     # The shutdown_event handler will take care of stopping agents and closing connections.
     return {"message": "ZEUS°NXTLVL System halting. Please wait for graceful shutdown."}
 
@@ -234,6 +262,7 @@ async def orchestration_loop():
             if current_utc_day != last_pnl_reset_day:
                 logger.info("New day detected. Resetting daily P&L.")
                 orchestrator_state["daily_pnl"] = 0.0
+                orchestrator_state["start_of_day_capital"] = orchestrator_state["total_capital"]
                 await redis_cache.set_total_system_pnl(0.0)
                 last_pnl_reset_day = current_utc_day
 
@@ -272,7 +301,7 @@ async def orchestration_loop():
                 "system_status": orchestrator_state["status"],
                 "daily_pnl": orchestrator_state["daily_pnl"],
                 "active_agents_count": len(active_agents),
-                "agents_status": (await get_agents_status()).dict(), # Convert Pydantic model to dict
+                "agents_status": await get_agents_status(),
                 "total_capital": orchestrator_state["total_capital"],
                 "timestamp": datetime.utcnow().isoformat()
             })
@@ -306,11 +335,32 @@ async def generate_ai_signals(market_data: Dict, sentiment_data: Dict) -> Dict:
     # logger.debug(f"Gemini Analysis: {gemini_analysis}")
 
     # For demonstration, simulate a signal
-    signal = {"direction": "HOLD", "confidence": 0.5, "expected_return": 0.0, "asset": market_data["symbol"]}
-    if market_data.get("price", 0) > 3000 and "bullish" in sentiment_data.get("social_sentiment", "").lower():
-         signal = {"direction": "BUY", "confidence": random.uniform(0.975, 0.999), "expected_return": random.uniform(0.05, 0.1), "asset": market_data["symbol"]}
-    elif market_data.get("price", 0) < 2500 and "bearish" in sentiment_data.get("social_sentiment", "").lower():
-         signal = {"direction": "SELL", "confidence": random.uniform(0.975, 0.999), "expected_return": random.uniform(0.05, 0.1), "asset": market_data["symbol"]}
+    signal = {
+        "direction": "HOLD",
+        "confidence": 0.5,
+        "expected_return": 0.0,
+        "asset": market_data["symbol"],
+    }
+    if (
+        market_data.get("price", 0) > 3000
+        and "bullish" in sentiment_data.get("social_sentiment", "").lower()
+    ):
+        signal = {
+            "direction": "BUY",
+            "confidence": random.uniform(0.975, 0.999),
+            "expected_return": random.uniform(0.05, 0.1),
+            "asset": market_data["symbol"],
+        }
+    elif (
+        market_data.get("price", 0) < 2500
+        and "bearish" in sentiment_data.get("social_sentiment", "").lower()
+    ):
+        signal = {
+            "direction": "SELL",
+            "confidence": random.uniform(0.975, 0.999),
+            "expected_return": random.uniform(0.05, 0.1),
+            "asset": market_data["symbol"],
+        }
 
     return signal
 
@@ -348,7 +398,7 @@ async def update_capital_allocation():
     
     capital_per_agent = total_capital / active_agent_count
     for agent_name in active_agents.keys():
-        await redis_cache.set(f"agent:{agent_name}:capital_allocation", capital_per_agent)
+        await redis_cache.update_agent_status(agent_name, capital_allocated=capital_per_agent)
         logger.debug(f"Allocated ${capital_per_agent:.2f} to {agent_name}")
 
 async def execute_trades_via_agents(qualified_agent_names: List[str], asset: str):
@@ -393,7 +443,7 @@ async def enforce_risk_controls():
     Implements RiskSentinelX: Max daily drawdown, max trade loss, consecutive losses.
     """
     current_daily_pnl = await redis_cache.get_total_system_pnl()
-    initial_daily_capital = orchestrator_state["total_capital"] # Needs to be tracked from start of day
+    initial_daily_capital = orchestrator_state.get("start_of_day_capital", orchestrator_state["total_capital"])
     
     # Mock for demonstration:
     daily_drawdown = current_daily_pnl / initial_daily_capital if initial_daily_capital else 0.0
@@ -448,4 +498,4 @@ async def websocket_dashboard(websocket: WebSocket):
 
 
 if __name__ == "__main__":
-    uvicorn.run("backend.api.main:app", host="0.0.0.0", port=settings.API_PORT, reload=False) # reload=True for dev
+    uvicorn.run("orchestrator:app", host="0.0.0.0", port=settings.API_PORT, reload=False)  # reload=True for dev
