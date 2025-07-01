@@ -1,3 +1,4 @@
 class AbstractAgent:
-    async def signal(self, data):
+    def signal(self, data):
+        """Return a trading signal and confidence."""
         raise NotImplementedError

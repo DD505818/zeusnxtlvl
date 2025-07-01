@@ -1,5 +1,6 @@
 
-import argparse, pandas as pd
+import argparse
+import pandas as pd
 from backend.agents.top_agents import QuantumBoostAgent, PredictiveProphetAgent, VWAPScalperXAgent
 
 def main(agent_name, data_path):

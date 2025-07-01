@@ -1,6 +1,7 @@
 # ZEUS°NXTLVL
 
 This repository contains a minimal AI trading stack with a FastAPI backend and a Next.js frontend.
+Ensure Docker and Node.js are installed before building the containers. A sample OHLCV CSV is required for backtesting; provide your own data as `sample_ohlcv.csv` or adjust the `--data` argument.
 
 ## Project Layout
 - **backend/** – FastAPI application and trading logic
